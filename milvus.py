@@ -2,7 +2,7 @@ import fire
 import random
 
 
-from pymilvus import MilvusClient, Collection
+from pymilvus import MilvusClient
 from tqdm import tqdm
 
 

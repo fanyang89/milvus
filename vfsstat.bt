@@ -1,0 +1,51 @@
+#!/usr/bin/env bpftrace
+
+BEGIN
+{
+	printf("Tracing key VFS calls... Hit Ctrl-C to end.\n");
+}
+
+/*
+kretprobe:vfs_read
+/comm == "milvus"/
+{
+	// @read_sizes = lhist(retval, 0, 262144, 4096);
+}
+*/
+
+kretprobe:vfs_write
+/comm == "milvus"/
+{
+	// @write_sizes = lhist(retval, 0, 262144, 4096);
+	@[retval] = count();
+}
+
+/*
+kprobe:vfs_read*,
+kprobe:vfs_write*,
+kprobe:vfs_fsync,
+kprobe:vfs_open,
+kprobe:vfs_create
+/comm == "milvus"/
+{
+	// @[func] = count();
+}
+*/
+
+interval:s:1
+{
+	time();
+	print(@);
+	clear(@);
+	//print(@read_sizes);
+	//clear(@read_sizes);
+	//print(@write_sizes);
+	//clear(@write_sizes);
+}
+
+END
+{
+	clear(@);
+	//clear(@read_sizes);
+	//clear(@write_sizes);
+}

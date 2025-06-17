@@ -39,14 +39,12 @@ class MilvusCli:
         if self.client.has_collection(collection_name=name):
             self.client.drop_collection(collection_name=name)
 
-    def create_vectors(self):
+    def create_vectors(self, total: int = 1024, batch: int = 128):
         if not self.client.has_collection(collection_name=COLLECTION_NAME):
             self.client.create_collection(
                 collection_name=COLLECTION_NAME, dimension=1024
             )
 
-        total = 1024
-        batch = 128
         with tqdm(total=total) as pbar:
             for i in range(0, total, batch):
                 data = [
@@ -60,7 +58,6 @@ class MilvusCli:
                 res = self.client.insert(collection_name=COLLECTION_NAME, data=data)
                 assert res["insert_count"] == batch
                 pbar.update(batch)
-                print(res)
 
     def count(self, name: str = COLLECTION_NAME):
         c = self.client.query(collection_name=name, output_fields=["count(*)"])

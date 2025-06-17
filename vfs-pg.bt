@@ -7,14 +7,14 @@ BEGIN
 
 /*
 kretprobe:vfs_read
-/comm == "milvus"/
+/comm == "postgres"/
 {
 	// @read_sizes = lhist(retval, 0, 262144, 4096);
 }
 */
 
 kretprobe:vfs_write
-/comm == "milvus"/
+/comm == "postgres"/
 {
 	@write_sizes = lhist(retval, 0, 262144, 4096);
 	// @[retval] = count();
@@ -26,7 +26,7 @@ kprobe:vfs_write*,
 kprobe:vfs_fsync,
 kprobe:vfs_open,
 kprobe:vfs_create
-/comm == "milvus"/
+/comm == "postgres"/
 {
 	// @[func] = count();
 }
@@ -35,8 +35,8 @@ kprobe:vfs_create
 interval:s:1
 {
 	time();
-	print(@);
-	clear(@);
+	//print(@);
+	//clear(@);
 	//print(@read_sizes);
 	//clear(@read_sizes);
 	print(@write_sizes);
@@ -45,7 +45,7 @@ interval:s:1
 
 END
 {
-	clear(@);
+	//clear(@);
 	//clear(@read_sizes);
-	//clear(@write_sizes);
+	clear(@write_sizes);
 }

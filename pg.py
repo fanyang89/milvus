@@ -25,15 +25,27 @@ def get_doc(i: int):
 
 
 class PgvectorCli:
-    def create_vectors(self, dsn: str = "dbname=test user=postgres"):
+    def create_vectors(
+        self, dsn: str = "dbname=vectors user=postgres", total: int = 1024
+    ):
         with psycopg.connect(dsn) as conn:
             conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
             register_vector(conn)
             conn.execute(
-                "CREATE TABLE vectors (id bigserial PRIMARY KEY, embedding vector(3))"
+                "CREATE TABLE IF NOT EXISTS demo (id bigserial PRIMARY KEY, text VARCHAR, embedding vector(1024))"
             )
-            embedding = np.array([1, 2, 3])
-            conn.execute("INSERT INTO items (embedding) VALUES (%s)", (embedding,))
+            with tqdm(total=total) as pbar:
+                for i in range(total):
+                    embedding = np.array(create_random_vector())
+                    text = get_doc(i)
+                    conn.execute(
+                        "INSERT INTO demo (text, embedding) VALUES (%s, %s)",
+                        (
+                            text,
+                            embedding,
+                        ),
+                    )
+                    pbar.update(1)
 
 
 if __name__ == "__main__":
